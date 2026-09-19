@@ -150,6 +150,7 @@ if (maek.OS === 'windows') {
 // objFileBase (optional): base name object file to produce (if not supplied, set to options.objDir + '/' + cppFile without the extension)
 //returns objFile: objFileBase + a platform-dependant suffix ('.o' or '.obj')
 const game_names = [
+	maek.CPP('Story.cpp'),
 	maek.CPP('PlayMode.cpp'),
 	maek.CPP('main.cpp'),
 	maek.CPP('LitColorTextureProgram.cpp'),
@@ -199,6 +200,29 @@ const show_meshes_exe = maek.LINK([...show_meshes_names, ...common_names], 'scen
 const show_scene_exe = maek.LINK([...show_scene_names, ...common_names], 'scenes/show-scene');
 
 const freetype_test_exe = maek.LINK([...freetype_test_names], 'freetype-test');
+
+// Narrative compilation is independent of the native library dependencies.
+// Override PYTHON on systems where Python 3 is named differently.
+const story_asset = 'dist/story.bin';
+const compile_story = async () => {
+	await new Promise((resolve, reject) => {
+		require('child_process').execFile(process.env.PYTHON || 'python3',
+			['tools/compile_story.py'], (error, stdout, stderr) => {
+				if (stdout) process.stdout.write(stdout);
+				if (stderr) process.stderr.write(stderr);
+				if (error) reject(error); else resolve();
+			});
+	});
+};
+compile_story.depends = ['tools/compile_story.py', 'assets/story/righteous-knight.twee'];
+compile_story.label = 'STORY ' + story_asset;
+maek.tasks[story_asset] = compile_story;
+const assets_target = async () => {};
+assets_target.depends = [story_asset];
+assets_target.label = 'ASSETS';
+maek.tasks[':assets'] = assets_target;
+// Building the game also validates/rebuilds its narrative data.
+maek.tasks[game_exe].depends.push(story_asset);
 
 //set the default target to the game (and copy the readme files):
 maek.TARGETS = [game_exe, show_meshes_exe, show_scene_exe, freetype_test_exe, ...copies];
