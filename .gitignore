@@ -18,3 +18,8 @@ scenes/show-meshes*
 scenes/show-scene*
 *.blend[0-9]
 maek-cache.json
+
+# Generated narrative assets (rebuild with node Maekfile.js :assets):
+dist/story.bin
+dist/story.inspect.json
+__pycache__/
