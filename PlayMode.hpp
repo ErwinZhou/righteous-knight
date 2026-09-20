@@ -2,6 +2,8 @@
 #include "Mode.hpp"
 #include "Story.hpp"
 #include "FontAsset.hpp"
+#include "TextRenderer.hpp"
+#include <memory>
 
 struct PlayMode : Mode {
     PlayMode();
@@ -16,6 +18,7 @@ struct PlayMode : Mode {
 
     Story story;
     FontAsset font;
+    std::unique_ptr<TextRenderer> text_renderer;
     uint32_t current_node = 0;
     uint32_t selected_choice = 0;
     float scroll_y = 0.0f;

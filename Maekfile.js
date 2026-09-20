@@ -150,6 +150,8 @@ if (maek.OS === 'windows') {
 const game_names = [
 	maek.CPP('Story.cpp'),
 	maek.CPP('FontAsset.cpp'),
+	maek.CPP('TextProgram.cpp'),
+	maek.CPP('TextRenderer.cpp'),
 	maek.CPP('PlayMode.cpp'),
 	maek.CPP('main.cpp'),
 	//maek.CPP('ColorTextureProgram.cpp'),  //not used right now, but you might want it
@@ -207,6 +209,21 @@ assets_target.label = 'ASSETS';
 maek.tasks[':assets'] = assets_target;
 // rebuild assets with the game
 maek.tasks[game_exe].depends.push(story_asset, ...font_assets);
+
+// optional render check with a real OpenGL context
+maek.LINK([
+    maek.CPP('tests/stage2_check.cpp'),
+    ...['FontAsset', 'TextRenderer', 'TextProgram', 'gl_compile_program', 'GL', 'load_save_png']
+        .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
+], 'objs/stage2-check');
+
+// optional story state check without drawing
+maek.LINK([
+    maek.CPP('tests/stage1_check.cpp'),
+    ...['PlayMode', 'Story', 'FontAsset', 'TextRenderer', 'TextProgram',
+        'gl_compile_program', 'GL', 'Mode', 'data_path']
+        .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
+], 'objs/stage1-check');
 
 //set the default target to the game (and copy the readme files):
 maek.TARGETS = [game_exe, freetype_test_exe, ...copies];

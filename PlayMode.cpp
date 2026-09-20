@@ -18,7 +18,7 @@ Story load_story() {
 PlayMode::PlayMode() : story(load_story()), font(data_path("fonts/NotoSerif.ttf")) {
     enter_node(story.start);
     std::cout << "Loaded font: " << data_path("fonts/NotoSerif.ttf")
-              << "\nStage 1 ready; text rendering is not implemented yet. Escape exits.\n";
+              << "\nStage 2 ready; the window shows a shaped sample line. Escape exits.\n";
 }
 
 void PlayMode::enter_node(uint32_t id) {
@@ -52,5 +52,10 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
     glDisable(GL_DEPTH_TEST);
     glClearColor(0.035f, 0.03f, 0.025f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    // text rendering comes in stage 2
+    // create graphics resources only after a context is available
+    if (!text_renderer) {
+        text_renderer = std::make_unique<TextRenderer>(font, 48);
+        text_renderer->set_line("A Rightesous Knight");
+    }
+    text_renderer->draw(drawable_size, {48.0f, 120.0f}, {0.95f, 0.88f, 0.72f, 1.0f});
 }
