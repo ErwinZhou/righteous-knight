@@ -137,8 +137,6 @@ let copies = [
 ];
 if (maek.OS === 'windows') {
 	copies.push( maek.COPY(`${NEST_LIBS}/SDL3/dist/SDL3.dll`, `dist/SDL3.dll`) );
-	//this one needed because the show-*.exe helpers sit in scenes/:
-	copies.push( maek.COPY(`${NEST_LIBS}/SDL3/dist/SDL3.dll`, `scenes/SDL3.dll`) );
 }
 
 //call rules on the maek object to specify tasks.
@@ -154,7 +152,6 @@ const game_names = [
 	maek.CPP('FontAsset.cpp'),
 	maek.CPP('PlayMode.cpp'),
 	maek.CPP('main.cpp'),
-	maek.CPP('LitColorTextureProgram.cpp'),
 	//maek.CPP('ColorTextureProgram.cpp'),  //not used right now, but you might want it
 	maek.CPP('Sound.cpp'),
 	maek.CPP('load_wav.cpp'),
@@ -167,25 +164,11 @@ const common_names = [
 	maek.CPP('PathFont-font.cpp'),
 	maek.CPP('DrawLines.cpp'),
 	maek.CPP('ColorProgram.cpp'),
-	maek.CPP('Scene.cpp'),
-	maek.CPP('Mesh.cpp'),
 	maek.CPP('load_save_png.cpp'),
 	maek.CPP('gl_compile_program.cpp'),
 	maek.CPP('Mode.cpp'),
 	maek.CPP('GL.cpp'),
 	maek.CPP('Load.cpp')
-];
-
-const show_meshes_names = [
-	maek.CPP('show-meshes.cpp'),
-	maek.CPP('ShowMeshesProgram.cpp'),
-	maek.CPP('ShowMeshesMode.cpp')
-];
-
-const show_scene_names = [
-	maek.CPP('show-scene.cpp'),
-	maek.CPP('ShowSceneProgram.cpp'),
-	maek.CPP('ShowSceneMode.cpp')
 ];
 
 const freetype_test_names = [
@@ -197,8 +180,6 @@ const freetype_test_names = [
 // exeFileBase: name of executable file to produce
 //returns exeFile: exeFileBase + a platform-dependant suffix (e.g., '.exe' on windows)
 const game_exe = maek.LINK([...game_names, ...common_names], 'dist/game');
-const show_meshes_exe = maek.LINK([...show_meshes_names, ...common_names], 'scenes/show-meshes');
-const show_scene_exe = maek.LINK([...show_scene_names, ...common_names], 'scenes/show-scene');
 
 const freetype_test_exe = maek.LINK([...freetype_test_names], 'freetype-test');
 
@@ -228,7 +209,7 @@ maek.tasks[':assets'] = assets_target;
 maek.tasks[game_exe].depends.push(story_asset, ...font_assets);
 
 //set the default target to the game (and copy the readme files):
-maek.TARGETS = [game_exe, show_meshes_exe, show_scene_exe, freetype_test_exe, ...copies];
+maek.TARGETS = [game_exe, freetype_test_exe, ...copies];
 
 //Note that tasks that produce ':abstract targets' are never cached.
 // This is similar to how .PHONY targets behave in make.
