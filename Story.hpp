@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-// compiled narratives, leave rendering and input to the caller
+// compiled story data
 struct Story {
     struct Choice {
         std::string label;
@@ -11,7 +11,7 @@ struct Story {
     };
     struct Node {
         std::string name;
-        std::string text; // UTF-8 preserving paragraph and line breaks
+        std::string text; // text in UTF-8 with original line breaks
         std::vector<Choice> choices;
     };
     std::string title;

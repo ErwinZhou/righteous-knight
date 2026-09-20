@@ -115,7 +115,17 @@ int main(int argc, char **argv) {
 	call_load_functions();
 
 	//------------ create game mode + make current --------------
-	Mode::set_current(std::make_shared< PlayMode >());
+	try {
+		Mode::set_current(std::make_shared< PlayMode >());
+	} catch (std::exception const &e) {
+		std::cerr << "Game initialization failed: " << e.what() << std::endl;
+		Sound::shutdown();
+		SDL_GL_DestroyContext(context);
+		SDL_DestroyWindow(Mode::window);
+		Mode::window = nullptr;
+		SDL_Quit();
+		return 1;
+	}
 
 	//------------ main loop ------------
 
