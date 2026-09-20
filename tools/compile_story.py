@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Compile the project's plain-text/link Twee subset; no third-party dependencies.
-Header syntax: https://github.com/iftechfoundation/twine-specs/blob/master/twee-3-specification.md
+"""compile plain text and links from Twee without extra dependencies
+header syntax: https://github.com/iftechfoundation/twine-specs/blob/master/twee-3-specification.md
 """
 import argparse
 import json
@@ -15,7 +15,7 @@ class StoryError(ValueError):
 
 
 def header(text):
-    # Strip only unescaped separator whitespace, preserving e.g. 'Gate\\ '.
+    # preserve escaped spaces in passage names
     match = re.match(r'((?:\\.|[^\[\{\\])*)(.*)$', text.lstrip())
     if not match:
         raise StoryError('invalid passage header')
@@ -99,7 +99,7 @@ def compile_text(source):
             elif not in_choices:
                 prose.append(line)
         text = '\n'.join(prose).rstrip('\n')
-        # Fail explicitly rather than silently executing/printing unsupported Harlowe.
+        # reject unsupported markup
         unsupported = r'\[|\]|\([\w-]+\s*:|\$\w|\b_\w|<[/!A-Za-z]|\*\*|//|~~|\^\^|\{\}|(?m:^\s*(?:\* |#{1,6} ))'
         if re.search(unsupported, text) or any(re.search(r'\[|\]|\$\w|\([\w-]+\s*:', c['label']) for c in choices):
             raise StoryError(f'{name!r}: unsupported markup; use plain text and standalone links')
@@ -149,7 +149,7 @@ def main():
         story, warnings = compile_text(args.source.read_text(encoding='utf-8-sig'))
         data = encode(story)
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        # Failed validation never overwrites a previously successful build.
+        # keep the previous build when validation fails
         temporary = args.output.with_suffix(args.output.suffix + '.tmp')
         temporary.write_bytes(data)
         temporary.replace(args.output)

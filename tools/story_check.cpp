@@ -3,7 +3,7 @@
 #include <set>
 #include <stdexcept>
 
-// Independent of SDL/OpenGL: validates loading and traverses every reachable edge.
+// checks loading and reachable choices without a window
 int main(int argc, char **argv) {
     try {
         if (argc != 2) throw std::runtime_error("Usage: story-check path/to/story.bin");
