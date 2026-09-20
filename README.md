@@ -16,7 +16,7 @@ How To Play:
 
 (TODO: describe the controls and (if needed) goals/strategy.)
 
-Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
+Sources: Noto Serif from [Google Fonts](https://github.com/google/fonts/tree/main/ofl/notoserif), licensed under SIL OFL 1.1. See `assets/fonts/OFL.txt` and `assets/fonts/README.md`.
 
 This game was built with [NEST](NEST.md).
 

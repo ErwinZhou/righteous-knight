@@ -19,7 +19,10 @@ scenes/show-scene*
 *.blend[0-9]
 maek-cache.json
 
-# Generated narrative assets (rebuild with node Maekfile.js :assets):
+# generated narrative assets
 dist/story.bin
 dist/story.inspect.json
 __pycache__/
+
+# generated font copies
+dist/fonts/
