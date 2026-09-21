@@ -2,11 +2,14 @@
 #include "GL.hpp"
 #include "data_path.hpp"
 #include <iostream>
+#include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 namespace {
 Story load_story() {
     auto path = data_path("story.bin");
+
     try {
         return Story::load(path);
     } catch (std::exception const &e) {
@@ -18,7 +21,7 @@ Story load_story() {
 PlayMode::PlayMode() : story(load_story()), font(data_path("fonts/NotoSerif.ttf")) {
     enter_node(story.start);
     std::cout << "Loaded font: " << data_path("fonts/NotoSerif.ttf")
-              << "\nStage 2 ready; the window shows a shaped sample line. Escape exits.\n";
+              << "\nStage 3 ready; the opening text wraps with the window. Escape exits.\n";
 }
 
 void PlayMode::enter_node(uint32_t id) {
@@ -49,13 +52,36 @@ void PlayMode::update(float) {
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
     if (drawable_size.x == 0 || drawable_size.y == 0) return;
+    
     glDisable(GL_DEPTH_TEST);
     glClearColor(0.035f, 0.03f, 0.025f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    // create graphics resources only after a context is available
-    if (!text_renderer) {
-        text_renderer = std::make_unique<TextRenderer>(font, 48);
-        text_renderer->set_line("A Rightesous Knight");
+
+    int window_width, window_height;
+    SDL_GetWindowSize(Mode::window, &window_width, &window_height);
+
+    if (window_width <= 0 || window_height <= 0) return;
+    glm::uvec2 logical_size(window_width, window_height);
+
+    float density = float(drawable_size.y) / window_height;
+    unsigned pixels = std::max(1u, unsigned(std::lround(24.0f * density)));
+
+    if (!text_renderer || pixels != font_pixels || density != font_density) {
+        // reset if the text render is missing or pixels/density changed
+        text_renderer.reset();
+        text_renderer = std::make_unique<TextRenderer>(font, pixels, density);
+        font_pixels = pixels;
+        font_density = density;
+        layout_dirty = true;
     }
-    text_renderer->draw(drawable_size, {48.0f, 120.0f}, {0.95f, 0.88f, 0.72f, 1.0f});
+
+    if (layout_window != logical_size) layout_dirty = true;
+    if (layout_dirty) {
+        float width = std::max(1.0f, std::min(800.0f, window_width - 64.0f));
+        text_renderer->set_text("A Rightesous Knight\n\n" + story.nodes.at(current_node).text, width);
+        layout_window = logical_size;
+        layout_dirty = false;
+    }
+    // actually draw the text or redener it
+    text_renderer->draw(logical_size, {32.0f, 32.0f}, {0.95f, 0.88f, 0.72f, 1.0f});
 }

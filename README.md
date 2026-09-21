@@ -4,7 +4,7 @@ Author: (TODO: your name)
 
 Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
 
-Text Drawing: `TextRenderer` shapes a UTF-8 sample line with HarfBuzz, rasterizes glyph IDs with FreeType, and draws cached quads using `TextProgram` and a shared grayscale OpenGL atlas. The current Stage 2 build shows a sample line at 48 physical pixels; story layout, wrapping, and DPI scaling are still pending. Escape exits.
+Text Drawing: `TextLayout` wraps UTF-8 text with HarfBuzz and preserves explicit line breaks. `TextRenderer` rasterizes glyph IDs with FreeType and draws cached quads from shared grayscale OpenGL atlas pages. The opening passage uses 24 logical pixels with DPI-aware rasterization; resizing rebuilds layout and changing DPI replaces the old font-size cache. Scrolling and choice interaction are still pending. Escape exits.
 
 Choices: Authored in Twine (Harlowe) and exported to `assets/story/righteous-knight.twee`. `tools/compile_story.py` validates links and compiles UTF-8 prose and ordered choices into `dist/story.bin`; `Story.cpp` loads the binary and resolves choices by node ID. Gameplay UI integration is still pending. See [asset pipeline instructions](docs/asset-pipeline.md).
 

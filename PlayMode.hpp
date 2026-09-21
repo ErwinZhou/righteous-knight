@@ -23,4 +23,8 @@ struct PlayMode : Mode {
     uint32_t selected_choice = 0;
     float scroll_y = 0.0f;
     bool layout_dirty = true;
+    // layout font density/pixels
+    glm::uvec2 layout_window = {0, 0};
+    float font_density = 0;
+    unsigned font_pixels = 0;
 };
