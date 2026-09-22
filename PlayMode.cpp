@@ -169,7 +169,7 @@ void PlayMode::rebuild_layout(glm::uvec2 logical_size) {
     if (state == State::ConfirmRestart) {
         text = {"Restart story?", "Your current progress will be lost.", "Restart", "Keep reading"};
     } else {
-        text = {"A Rightesous Knight", node.text};
+        text = {"A Righteous Knight", node.text};
         for (size_t i = 0; i < node.choices.size(); ++i)
             text.push_back(std::to_string(i + 1) + ". " + node.choices[i].label);
     }

@@ -126,6 +126,11 @@ if (maek.OS === "windows") {
 // from: file to copy from
 // to: file to copy to
 let copies = [
+	maek.COPY('README.md', 'dist/README.md'),
+	maek.COPY('screenshot.png', 'dist/screenshot.png'),
+	maek.COPY('NEST.md', 'dist/NEST.md'),
+	maek.COPY('docs/asset-pipeline.md', 'dist/docs/asset-pipeline.md'),
+	maek.COPY('docs/validation.md', 'dist/docs/validation.md'),
 	maek.COPY(`${NEST_LIBS}/SDL3/dist/README-SDL.txt`, `dist/README-SDL.txt`),
 	maek.COPY(`${NEST_LIBS}/libpng/dist/README-libpng.txt`, `dist/README-libpng.txt`),
 	maek.COPY(`${NEST_LIBS}/glm/dist/README-glm.txt`, `dist/README-glm.txt`),

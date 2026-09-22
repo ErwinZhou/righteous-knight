@@ -22,3 +22,9 @@ __pycache__/
 
 # generated font copies
 dist/fonts/
+
+# generated distribution documentation
+dist/README.md
+dist/screenshot.png
+dist/NEST.md
+dist/docs/
