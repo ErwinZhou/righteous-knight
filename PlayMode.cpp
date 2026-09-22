@@ -25,15 +25,17 @@ void scissor(PlayMode::Rect r, glm::uvec2 logical, glm::uvec2 physical) {
 
 PlayMode::PlayMode() : story(load_story()), font(data_path("fonts/NotoSerif.ttf")) {
     enter_node(story.start);
-    std::cout << "Stage 4 ready; scroll to read and focus choices; Escape exits\n";
+    std::cout << "Ready; Enter or click chooses, R restarts, Escape exits\n";
 }
 
 void PlayMode::enter_node(uint32_t id) {
     auto const &node = story.nodes.at(id);
+    state = State::Reading;
     current_node = id;
     selected_choice = 0;
     scroll_y = 0;
     hovered_choice = -1;
+    mouse_position = {-1, -1};
     choice_rects.clear();
     block_origins.clear();
     layout_dirty = true;
@@ -41,6 +43,37 @@ void PlayMode::enter_node(uint32_t id) {
 }
 
 void PlayMode::select_choice(uint32_t option) { enter_node(story.choose(current_node, option)); }
+
+void PlayMode::request_restart() {
+    saved_scroll = scroll_y;
+    saved_choice = selected_choice;
+    state = State::ConfirmRestart;
+    selected_choice = 0;
+    scroll_y = 0;
+    hovered_choice = -1;
+    choice_rects.clear();
+    layout_dirty = true;
+}
+
+void PlayMode::cancel_restart() {
+    state = State::Reading;
+    scroll_y = saved_scroll;
+    selected_choice = saved_choice;
+    hovered_choice = -1;
+    choice_rects.clear();
+    layout_dirty = true;
+}
+
+void PlayMode::confirm_selection() {
+    // one confirmation changes one screen and invalidates its old hit regions
+    if (layout_dirty) return;
+    if (state == State::ConfirmRestart) {
+        if (selected_choice == 0) enter_node(story.start);
+        else cancel_restart();
+    } else if (selected_choice < story.nodes.at(current_node).choices.size()) {
+        select_choice(selected_choice);
+    }
+}
 
 int PlayMode::hit_choice(glm::vec2 mouse) const {
     if (layout_dirty || !reading_viewport.contains(mouse)) return -1;
@@ -64,8 +97,14 @@ void PlayMode::reveal_choice() {
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
+    if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.repeat) return true;
     if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.key == SDLK_ESCAPE) {
-        Mode::set_current(nullptr);
+        if (state == State::ConfirmRestart) cancel_restart();
+        else Mode::set_current(nullptr);
+        return true;
+    }
+    if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.key == SDLK_R) {
+        if (state == State::Reading && !layout_dirty) request_restart();
         return true;
     }
     if (window_size != layout_window || evt.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) layout_dirty = true;
@@ -79,7 +118,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
     if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && evt.button.button == SDL_BUTTON_LEFT) {
         mouse_position = {evt.button.x, evt.button.y};
         hovered_choice = hit_choice(mouse_position);
-        if (hovered_choice >= 0) selected_choice = uint32_t(hovered_choice);
+        if (evt.button.clicks > 1) return true;
+        if (hovered_choice >= 0) {
+            selected_choice = uint32_t(hovered_choice);
+            confirm_selection();
+        }
         return true;
     }
     if (evt.type == SDL_EVENT_MOUSE_WHEEL) {
@@ -89,6 +132,8 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
     }
     if (evt.type == SDL_EVENT_KEY_DOWN) {
         switch (evt.key.key) {
+        case SDLK_RETURN:
+        case SDLK_KP_ENTER: confirm_selection(); return true;
         case SDLK_HOME: scroll_to(0); return true;
         case SDLK_END: scroll_to(max_scroll); return true;
         case SDLK_PAGEUP: scroll_to(scroll_y - reading_viewport.height * 0.85f); return true;
@@ -111,13 +156,23 @@ void PlayMode::update(float) {}
 
 void PlayMode::rebuild_layout(glm::uvec2 logical_size) {
     float width = std::max(1.0f, std::min(800.0f, float(logical_size.x) - 48.0f));
-    footer_renderer->set_text("Up/Down: focus   Wheel/Page: scroll   Home/End: top/bottom   Esc: exit", width);
+    auto const &node = story.nodes.at(current_node);
+    std::string controls = state == State::ConfirmRestart
+        ? "Enter/click: confirm   Up/Down: select   Esc: cancel"
+        : node.choices.empty()
+            ? "End of story   R: restart   Esc: exit   Wheel/Page: scroll"
+            : "Enter/click: choose   Up/Down: focus   Wheel/Page: scroll   Home/End: top/bottom   R: restart   Esc: exit";
+    footer_renderer->set_text(controls, width);
     footer_y = std::max(0.0f, float(logical_size.y) - footer_renderer->text_block().height - 16.0f);
     reading_viewport = {24, 24, width, std::max(1.0f, footer_y - 40.0f)};
-    auto const &node = story.nodes.at(current_node);
-    std::vector<std::string> text = {"A Rightesous Knight", node.text};
-    for (size_t i = 0; i < node.choices.size(); ++i)
-        text.push_back(std::to_string(i + 1) + ". " + node.choices[i].label);
+    std::vector<std::string> text;
+    if (state == State::ConfirmRestart) {
+        text = {"Restart story?", "Your current progress will be lost.", "Restart", "Keep reading"};
+    } else {
+        text = {"A Rightesous Knight", node.text};
+        for (size_t i = 0; i < node.choices.size(); ++i)
+            text.push_back(std::to_string(i + 1) + ". " + node.choices[i].label);
+    }
     text_renderer->set_blocks(text, std::max(1.0f, width - 24));
     block_origins.clear();
     choice_rects.clear();

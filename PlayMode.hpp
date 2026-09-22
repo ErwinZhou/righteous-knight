@@ -13,6 +13,13 @@ struct PlayMode : Mode {
     void draw(glm::uvec2 const &drawable_size) override;
     void enter_node(uint32_t id);
     void select_choice(uint32_t option);
+    void confirm_selection();
+    void request_restart();
+    void cancel_restart();
+    enum class State { Reading, ConfirmRestart };
+    State state = State::Reading;
+    float saved_scroll = 0;
+    uint32_t saved_choice = 0;
 
     struct Rect {
         float x = 0, y = 0, width = 0, height = 0;
