@@ -233,6 +233,13 @@ maek.LINK([
         .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
 ], 'objs/stage3-check');
 
+maek.LINK([
+    maek.CPP('tests/stage4_check.cpp'),
+    ...['PlayMode', 'FontAsset', 'TextRenderer', 'TextLayout', 'TextProgram', 'Story',
+        'gl_compile_program', 'GL', 'Mode', 'data_path', 'load_save_png']
+        .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
+], 'objs/stage4-check');
+
 //set the default target to the game (and copy the readme files):
 maek.TARGETS = [game_exe, freetype_test_exe, ...copies];
 

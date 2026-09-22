@@ -97,33 +97,35 @@ TextRenderer::Glyph const &TextRenderer::ensure_glyph(uint32_t id) { // rasteriz
     return glyphs.emplace(id, glyph).first->second;
 }
 
-void TextRenderer::upload(TextBlock const &prepared) {
+void TextRenderer::upload(std::vector<TextBlock> const &prepared) {
     std::vector<Vertex> vertices;
     std::vector<Batch> pending;
     size_t count = 0;
     float density = layout.pixel_density();
     // turn glyph positions into logical-pixel quads grouped by atlas page
-    for (auto const &line : prepared.lines) {
-        float pen_x = 0, pen_y = 0;
-        count += line.glyphs.size();
-        for (auto const &position : line.glyphs) {
-            auto const &g = ensure_glyph(position.id);
-            float x = pen_x + position.x_offset + g.left / density;
-            float y = line.baseline - pen_y - position.y_offset - g.top / density;
-            if (g.width && g.height) {
-                if (vertices.size() > size_t(std::numeric_limits<GLsizei>::max()) - 6)
-                    throw std::runtime_error("Text block exceeds draw limit");
-                if (pending.empty() || pending.back().page != g.page)
-                    pending.push_back({g.page, GLint(vertices.size()), 0});
-                pending.back().count += 6;
-                float right = x + g.width / density, bottom = y + g.height / density;
-                float u = float(g.x) / atlas_size, v = float(g.y) / atlas_size;
-                float ur = float(g.x + g.width) / atlas_size, vb = float(g.y + g.height) / atlas_size;
-                vertices.insert(vertices.end(), {{x,y,u,v}, {right,y,ur,v}, {x,bottom,u,vb},
-                                                {x,bottom,u,vb}, {right,y,ur,v}, {right,bottom,ur,vb}});
+    for (size_t block_index = 0; block_index < prepared.size(); ++block_index) {
+        for (auto const &line : prepared[block_index].lines) {
+            float pen_x = 0, pen_y = 0;
+            count += line.glyphs.size();
+            for (auto const &position : line.glyphs) {
+                auto const &g = ensure_glyph(position.id);
+                float x = pen_x + position.x_offset + g.left / density;
+                float y = line.baseline - pen_y - position.y_offset - g.top / density;
+                if (g.width && g.height) {
+                    if (vertices.size() > size_t(std::numeric_limits<GLsizei>::max()) - 6)
+                        throw std::runtime_error("Text block exceeds draw limit");
+                    if (pending.empty() || pending.back().page != g.page || pending.back().block != block_index)
+                        pending.push_back({g.page, block_index, GLint(vertices.size()), 0});
+                    pending.back().count += 6;
+                    float right = x + g.width / density, bottom = y + g.height / density;
+                    float u = float(g.x) / atlas_size, v = float(g.y) / atlas_size;
+                    float ur = float(g.x + g.width) / atlas_size, vb = float(g.y + g.height) / atlas_size;
+                    vertices.insert(vertices.end(), {{x,y,u,v}, {right,y,ur,v}, {x,bottom,u,vb},
+                                                    {x,bottom,u,vb}, {right,y,ur,v}, {right,bottom,ur,vb}});
+                }
+                pen_x += position.x_advance;
+                pen_y += position.y_advance;
             }
-            pen_x += position.x_advance;
-            pen_y += position.y_advance;
         }
     }
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -135,29 +137,34 @@ void TextRenderer::upload(TextBlock const &prepared) {
 }
 
 void TextRenderer::set_line(std::string const &text) {
-    if (has_text && current_width == 0 && current_text == text) return;
+    if (has_text && current_width == 0 && current_text == std::vector<std::string>{text}) return;
     TextBlock prepared;
     prepared.lines.push_back(layout.shape(text));
     prepared.width = prepared.lines.front().width;
     prepared.height = layout.line_height();
-    upload(prepared);
-    block = std::move(prepared);
-    current_text = text;
+    upload({prepared});
+    blocks = {std::move(prepared)};
+    current_text = {text};
     current_width = 0;
     has_text = true;
 }
 
 void TextRenderer::set_text(std::string const &text, float width) {
+    set_blocks({text}, width);
+}
+
+void TextRenderer::set_blocks(std::vector<std::string> const &text, float width) {
     if (has_text && current_width == width && current_text == text) return;
-    auto prepared = layout.wrap(text, width);
+    std::vector<TextBlock> prepared;
+    for (auto const &part : text) prepared.emplace_back(layout.wrap(part, width));
     upload(prepared);
-    block = std::move(prepared);
+    blocks = std::move(prepared);
     current_text = text;
     current_width = width;
     has_text = true;
 }
 
-void TextRenderer::draw(glm::uvec2 viewport, glm::vec2 origin, glm::vec4 color) {
+void TextRenderer::draw(glm::uvec2 viewport, glm::vec2 origin, glm::vec4 color, size_t block_index) {
     if (!viewport.x || !viewport.y || batches.empty()) return;
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
@@ -172,6 +179,7 @@ void TextRenderer::draw(glm::uvec2 viewport, glm::vec2 origin, glm::vec4 color) 
     glBindVertexArray(vao);
     // draw cached geometry in text order using each batch's atlas page
     for (auto const &batch : batches) {
+        if (batch.block != block_index) continue;
         glBindTexture(GL_TEXTURE_2D, pages[batch.page].texture);
         glDrawArrays(GL_TRIANGLES, batch.first, batch.count);
     }
