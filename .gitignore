@@ -13,8 +13,19 @@ dist/SDL3.dll
 dist/game
 dist/game.exe
 freetype-test*
-scenes/SDL3.dll
-scenes/show-meshes*
-scenes/show-scene*
-*.blend[0-9]
 maek-cache.json
+
+# generated narrative assets
+dist/story.bin
+dist/story.inspect.json
+__pycache__/
+
+# generated font copies
+dist/fonts/
+
+# generated distribution documentation
+dist/README.md
+dist/screenshot.png
+dist/NEST.md
+dist/docs/
+dist/screenshots/

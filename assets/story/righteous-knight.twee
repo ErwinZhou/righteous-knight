@@ -1,0 +1,653 @@
+:: StoryTitle
+righteous-knight
+
+
+:: StoryData
+{
+  "ifid": "33701313-6516-4B60-91D2-65F896420886",
+  "format": "Harlowe",
+  "format-version": "3.3.9",
+  "start": "Childhood",
+  "tag-colors": {
+    "Fork1": "green"
+  },
+  "zoom": 0.6
+}
+
+
+:: "Be a good man." You know you have to do something about it. {"position":"1050,650","size":"100,100"}
+I will kill him
+For my vows and
+For millions of people like her.
+
+You made up your mind, but you knew it will be a tough road.
+You waited almost a year to seize opportunies.
+Finally,
+Next Monday is the king's 20th nameday. And he will be showing himself in the king's road in the midtown. A royal progress.
+
+This is it,
+You told yourself.
+
+But you will need help.
+The king's strongest guard and knight, Sir Gawain, is with him 24/7 almost. It is told that he is invincible.
+You got to know a lot of people in these years of wars. There are two of them you think you can trust:
+
+[[Gate, a smith that you know from Vandes villiage, he could the build the finest armor for you. We could strike him during the parade.]]
+
+[[Vane, A facemaker...that you once captured during the war and you set him free. He promised he will help you in any situation. You just saw him yesterday in the inn. Maybe he could think of something...]]
+
+[["Maybe I should get a family like she once said..."]]
+
+
+:: "How did I get here?" {"position":"1100,400","size":"100,100"}
+"Oh right, a fleabag. I was born there"
+
+Stinky, crowded, noisy,
+And of course, hungry.
+That was all you can recall.
+
+You try to picture the faces of your mom and dad, but it does not work.
+It never did. 
+At least for the first 10 years.
+
+But she found you there.
+She was already pregnant when she found you being beaten up in the street corner. You were skinny, mud on your face. She came close, broke the bread at her hand in half and slowly offered me. Her hands were shaking, probably afraid of me. Right...I could relate if I was her. 
+
+She used to work at a brothel near the skid row. A lot of powerful men came by everyday to have fun without being found by their wives. But she accidentally caught a disease from one of them. They abandoned her, because she can no longer work. 
+
+She gave me a home ever since, even though that means another mouth to feed.
+The word "mom", has a face then.
+
+The life was tough, 
+Luckily we got each other.
+You once asked her, 
+"Do we have a dad?"
+"Once, but he will never come back."
+You never asked further, you are smart.
+
+[["I will not let them suffer..."]]
+
+
+:: "I am grateful for that. But no. That is not my place to be." {"position":"2050,1475","size":"100,100"}
+“I am grateful.
+But no.
+That is not my place to be.”
+
+You waited for anger.
+For the guards to step forward.
+For the Queen to remind you that you had no right to refuse.
+
+Instead,
+Gwyneth smiled.
+
+Her shoulders relaxed.
+Beside her, the Queen closed her eyes and let out a long breath.
+
+“May I ask why?” Gwyneth said.
+
+You looked at the crown.
+
+“Because I want it.
+And I am afraid of how much.”
+
+She took her mother’s hand.
+They were both smiling now.
+
+“Then there is something I want to show you.”
+
+
+For years, Gwyneth had been filling notebooks with a question nobody dared to ask:
+
+What happens when the King is wrong?
+
+Her answer lay across three sheets of parchment.
+
+“A parliament to make the laws.
+A king to carry them out.
+Independent courts to judge by them.”
+
+“Three rulers?” you asked.
+
+“Three powers. Each with limits the others can enforce.”
+
+She called it the separation of powers.
+
+“And who chooses the King?”
+
+She handed you the unfinished page.
+
+“We do.
+All of us.”
+
+At first, you waited for someone to draw a sword.
+
+Then you learned to listen for the vote.
+
+Greed had survived.
+But it could no longer have everything it wanted.
+
+One winter evening,
+you saw a woman leaving the public kitchen.
+
+An infant slept in her arms.
+Beside her, a thin child carried a loaf of bread.
+
+He broke it in half.
+The larger piece went to his mother.
+
+You knew that gesture.
+
+Gwyneth found you standing there,
+your face wet with tears.
+
+“Do you regret refusing?”
+
+You shook your head.
+
+That night, beside the fireplace,
+you remembered your brother's cute face and
+Your mother’s tired hands.
+
+You wished you could tell her,
+
+“We are doing better, Mom.”
+
+
+[[GOOD ENDING]]
+
+
+:: "I will not let them suffer..." {"position":"1250,425","size":"100,100"}
+Five years past,
+You are taller than her now.
+
+Three years ago, your brother did not make it through that flee. Her condition is worse one day after another. 
+She knew her time was close,
+So was you.
+
+"Get a family
+Live your life. 
+Take this sword, and
+Be a good man."
+That was her last words.
+
+You were recruited to the battlefield a year after, fighting their war. You swing that sword to the battle. You slayed thousands of enimies with it. That sword, she told you it once belongs to a knight. A famous one.
+
+You are stronger than anyone else.
+He were given the title of a kinght not long during the war. For your kills, of course.
+
+You made a vow,
+"Be a good man."
+You always remembered that.
+
+[[But then the famine came...]]
+
+
+:: "Maybe I should get a family like she once said..." {"position":"675,925","size":"100,100"}
+You give up.
+It is not your fault, it is not your responsibility either.
+You told yourself that on that day.
+
+You told yourself that on the day you met Marina.
+You told yourself that on the day you get married.
+You told yourself that on the day your son was born.
+You told yourself that on the day you bought your first house.
+You told yourself that on the day you moved to the east.
+You told yourself that on the day your legs start to hurt.
+You told yourself that on the day your sword start to get rusty.
+You told yourself that on the day you can not get out of the bed.
+
+You told yourself that on the last moment you died.
+
+[[BAD ENDDING]] 
+
+
+:: "Yes, I will take its price." {"position":"1150,900","size":"100,100"}
+You looked at the mirror.
+You can not believe yourself.
+And you know there is no coming back.
+
+You sneaked into the palace in the midnight before the parade. Because the kingsguard need to rest early that day so you know the real him will be asleep early. Nobody can tell you from the real Sir Gawain. You practiced well.
+
+Now in front of you there are two rooms, you have to choose one.
+
+[[Go to the King's bedroom]]
+
+[[The Queen's bedroom with her children]]
+
+
+:: BAD ENDDING {"position":"450,800","size":"100,100"}
+Wanna Restart?
+
+[[Childhood]] 
+
+
+:: But then the famine came... [Fork1] {"position":"925,500","size":"100,100"}
+Thousands of thousands,
+they died of hunger.
+
+But all he wants is conquer.
+Authur IV
+The Incompetent
+The Notorious
+The King
+
+He has two children, the oldest Princess Gwyneth and the youger Prince Valerian. It is being said that Gwyneth is a wise women and she is 21 this year. She read a lot of books in law and politics. People all said she will be a fine queen. Sadly, she is a woman and Valerian just turned 18.
+
+The king wants to take Umlandia, the wealthy neighbor country. He puts all the money in the vault for the war. Weapons, and horses. The rest of the money? 
+Probably for wine and fun. 
+
+[["Be a good man." You know you have to do something about it.]]
+
+
+:: Childhood {"position":"700,375","size":"100,100"}
+Cold
+...You opened your eyes...
+It seems that you just fell asleep, or maybe, almost...
+
+A log is holding in your right hand, wet. The rest are lying in front of you.
+Fireplace, you recognized it.
+
+Some small sparks are jumping around like naughty elves, almost dazzling for your eyes in the rest of the darkness. It must be them that woke you up, you figured. 
+
+[[You heard a baby crying behind you...]]
+
+
+
+
+
+:: GOOD ENDING {"position":"1575,1600","size":"100,100"}
+Wanna Restart?
+
+[[Childhood]] 
+
+
+:: Gate, a smith that you know from Vandes villiage, he could the build the finest armor for you. We could strike him during the parade. {"position":"775,600","size":"100,100"}
+A silver armor with a flower on your chest,
+"Perfect, this flower is for her."
+You said this to yourself and wait till that day.
+
+The parade is huge, thousands of people are here, it is crowded and chaotic. You knew it will be a good chance. Because it is hard to find you and good for you to disappear after the assassin.
+
+You sezie the moment, jump quickly onto the carriage, and take out your sword. You strike at him but get blocked suddenly. It is him, Sir Gawain. You always knew this could happen, so you start to fight, but his sword is sharper than anything you have seen. After a few rounds, your armor are broken and there is a wound on your left leg. 
+
+You can not get up again. He swing his sword in front of your face, and asks:
+
+"Any last words?"
+
+You suddenly realized,
+his sword has exactly the same inscription and engraving as yours, 
+"Protect the weak and the innocent."
+How sarcastic?
+The man mentioned by your mom,
+It was him...
+
+He put that sword down your throat, 
+You fell,
+
+You saw her face with your brother near the fireplace again,
+only this time it is blurried by your tears.
+
+"I am sorry, mom."
+
+[[BAD ENDDING]]
+
+
+:: Go to the King's bedroom {"position":"650,1100","size":"100,100"}
+It is him.
+But he is waiting for you.
+So is Sir Gawain.
+Vane snitched, it has to be him.
+You have no way but to fight.
+
+He is strong, just as the stories told. You knew this could be your only chance, so you fight will all the skills you have learnt during the war. But it is all for nothing. Your armor is way weaker than his and you are bleeding on both your arms and thighs in a few rounds. 
+
+You can not get up again. He swing his sword in front of your face, and asks:
+
+"Any last words?"
+
+Vane knew,
+his sword has exactly the same inscription and engraving as yours, 
+"Protect the weak and the innocent."
+How sarcastic?
+The man mentioned by your mom,
+It was him...
+
+He put that sword down your throat, 
+You fell,
+
+You saw her face with your brother near the fireplace again,
+only this time it is blurried by your tears.
+
+"I am sorry, mom."
+
+[[BAD ENDDING]] 
+
+
+:: Go to the King's bedroom - with Gwyneth and the Queen and Valerian died {"position":"1600,1325","size":"100,100"}
+"Talk to him. Go into his room and lower his alarms. I will kill him once you come out. If you snitched to him, I will come insdie and kill all three of you."
+The Queen has no other way but nods her head since you are putting a sword behind both of them. 
+You let them in and waited at the doorstep of the King's bedroom.
+
+Suddenly, the doors open, and the real Sir Gawain walks out. Standing outside the door and watching out for something. You are shocked and quickly hide behind a pillar. Why he is in King's room this late? Maybe he knows? And why the king sends him away just to talk to the Queen and her daughter? It must be something important or personal, you guessed.
+
+He is not wearing a helmet. It is a good opportunity to launched a sneak attack against him. You realized. 
+You sliently came close and use a heavy stone during the hallway to strike in his back of this head.  He falls down and passed away on the ground.
+
+You broke into the room and saw they are arguing something. 
+
+"No! Not on my watch!"
+
+You interrupted them. You draw the sword, charing to the King.
+
+"Oh no! Gawain!" He shouts but nobody answers.
+
+You aim at it.
+You have practiced it for thousands of nights in your sleep.
+You will never miss it.
+Your sword goes deep into his heart. 
+Eyes widened, bloodshot and staring.
+You looked staright into his eyes when the flame in his eyes start to fade away.
+He is so ugly.
+That is your first time seeing him this up close.
+He died.
+
+The sounds alarms the guards, you heard they are gathering outside. It's time to leave. You quickly run out of the room and head out to the shorted path out.
+
+On the way out
+you once looked back at the King's room for a second, 
+Strangly,
+You did not see grief in their eyes.
+
+[[You safely get out and on the second day...]]
+
+
+
+
+
+
+
+:: Go to the King's bedroom with Gwyneth and the Queen {"position":"1575,1100","size":"100,100"}
+"You can leave us now, We will talke to him."
+The Queen said this to you when you are at the doorstep of the King's bedroom.
+You listen and step back. 
+
+Suddenly, the doors open, and the real Sir Gawain walks out. Standing outside the door and watching out for something. You are shocked and quickly hide behind a pillar. Why he is in King's room this late? Maybe he knows? And why the king sends him away just to talk to the Queen and her daughter? It must be something important or personal, you guessed.
+
+He is not wearing a helmet. It is a good opportunity to launched a sneak attack against him. You realized. 
+You sliently came close and use a heavy stone during the hallway to strike in his back of this head.  He falls down and passed away on the ground.
+
+You broke into the room and saw they are arguing something. 
+
+"No! Not on my watch!"
+
+You interrupted them. You draw the sword, charing to the King.
+
+"Oh no! Gawain!" He shouts but nobody answers.
+
+You aim at it.
+You have practiced it for thousands of nights in your sleep.
+You will never miss it.
+Your sword goes deep into his heart. 
+Eyes widened, bloodshot and staring.
+You looked staright into his eyes when the flame in his eyes start to fade away.
+He is so ugly.
+That is your first time seeing him this up close.
+He died.
+
+The sounds alarms the guards, you heard they are gathering outside. It's time to leave. You quickly run out of the room and head out to the shorted path out.
+
+On the way out
+you once looked back at the King's room for a second, 
+Strangly,
+You did not see grief in their eyes.
+
+[[You safely get out and on the second day...But you felt like this is not the end...]]
+
+
+
+:: Just leave them there {"position":"1025,1300","size":"100,100"}
+You left, go straight to the King's room.
+
+[[Go to the King's bedroom]]
+
+
+:: Kill the young prince since he is the male succession. {"position":"1325,1300","size":"100,100"}
+You sneak close to the young prince, 
+you knew it is gonna be hard, killing a children?
+Am I a real knight?
+
+At the moment of your hesitation, he suddently open his eyes and take out a small knife that he hid under his sheet. He jumps toward you.
+
+"I knew it! Father told me. Die, you son of a whore!"
+
+You never expect that, he stabs into your left eyes and get onto your neck and try to stab it as well. You struggle hard to get rid of him. Suddenly you are tripped and fell behind, so is him on your back. You fall right onto the book shelf, so the shelf collapsed, you are quick to get out. But the prince is not that lucky.
+
+He died tragically.
+
+The sounds of your fight woke up the Queen and Gwyneth. They are shocked and can not believe their eyes. Tears start rolling down.
+
+"OMG..."
+
+You take out your sword, threatening them to keep it quite to not alarm the guards.
+
+"I need you to do something for me. The Old King, he has to die. I am sorry for what happend to your son. But I am doing it for the people. They are suffering."
+
+You originally assumed they will fight back. But Gwyneth speaks up with tears still in his eyes, with a shaking voice, "what do you want..."
+
+Let's go to the King's room.
+
+[[Go to the King's bedroom - with Gwyneth and the Queen and Valerian died]] 
+
+
+:: The Queen's bedroom with her children {"position":"1125,1175","size":"100,100"}
+You are inside the Isolde's room, the Queen
+along with two of her children, Gwyneth and Valerian.
+
+There were all in sleep, what do you want to do?
+
+[[Just leave them there]]
+
+[[Wake up the Queen and pretend you are Sir Gawain.]]
+
+[[Kill the young prince since he is the male succession.]]
+
+[[They are not actually innocent. Kill them all. They are blood lines.]]
+
+
+:: They are not actually innocent. Kill them all. They are blood lines. {"position":"1100,1525","size":"100,100"}
+You stand in the pool of blood. 
+You hands are dirty. 
+But you tell yourself it is necessary. 
+They are all evil people.
+
+[[Go to the King's bedroom]]
+
+
+
+
+:: This is the biggest opportunity to bring the peace to the realm by your own hand. "I accept it." You said it, in front of everyone. {"position":"2025,1100","size":"100,100"}
+The next thing you can remember,
+You were sitting on the Throne,
+and someone are putting the crown in your head.
+
+"I will save everyone and create the most peaceful kingdom that has ever been created!"
+You stood out and people cheered. You were surrounded by flowers.
+You knew you could.
+You have never believed in yourself this much.
+You are not Authur IV, or Valerian, or Sir Gawain. 
+
+At a glimpse, you saw disappointness in Gwyneth's eyes.
+But You did not care about it that much.
+
+But you were wrong.
+
+You began to understand when you learned that every exquisite delicacy you had dreamed of as a hungry child could be laid before you.
+Just one word.
+At first, you wondered how many empty plates it took to fill your table.
+Then you asked for more.
+
+You began to understand when you learned that a man who dared to question you could be dragged from the hall before he finished his sentence.
+Just one gesture.
+At first, the sudden silence frightened you.
+Then you began to enjoy finishing your sentences without interruption.
+
+You began to understand when you learned that a mistake you made could become someone else’s crime, and a lie you told could be taught to children as the truth.
+Just your signature.
+At first, you stayed awake remembering what had really happened.
+Then you stayed awake deciding what would happen next.
+
+Nobody had to teach you how to be cruel.
+They only had to keep asking what you wanted.
+
+And you wanted so many things.
+ 
+On the royal progress of your 13th name day, you looked down at the crowd.
+You saw a skinny women by the street corner.
+You saw a crying infant in her arms.
+You saw a skinny child standing next to her, begging for food.
+Hungry. Cold. Desperate.
+You saw the old you.
+
+You realized something,
+You draw the sword of your kingsguard's sword and cut your throat.
+You fell,
+
+You saw her face with your brother near the fireplace again,
+only this time it is blurried by your tears.
+
+"I am sorry, mom."
+
+[[BAD ENDDING]] 
+
+
+:: Vane, A facemaker...that you once captured during the war and you set him free. He promised he will help you in any situation. You just saw him yesterday in the inn. Maybe he could think of something... {"position":"1050,775","size":"100,100"}
+You came by his tent, 
+he told you has a idea.
+
+"You are exactly the same build as him, you know that? And the sword too."
+He is talking about Sir Gawain. 
+
+I offer you a deal, but it will come with a life price. 
+I will make you like him.
+Your face, your body, and even your tone, you can act like him, sneaked into the palace, nobody will realize. But of course, you will never have your face back again.
+
+Yes, it is indeed a life price. 
+
+[["Yes, I will take its price."]]
+
+[["Maybe I should get a family like she once said..."]]
+
+
+:: Wake up the Queen and pretend you are Sir Gawain. {"position":"1375,1050","size":"100,100"}
+You wake up the Queen gently and her daughter Gwyneth.
+
+Their alarm is off because they think you are Sir Gawain as well.
+
+"I am sorry to bother you, Your Grace. But the king is waiting for you both." You trick them to believing you. With a Queen by my side, things may be easier, you think. 
+
+Valerian seems still in sleep, you could tell he is faking it. But you do not try to mess with him. You are aiming for the king first.
+
+[[Go to the King's bedroom with Gwyneth and the Queen]] 
+
+
+:: You heard a baby crying behind you... {"position":"900,350","size":"100,100"}
+Is is your brother,
+Only a couple of months old. 
+
+A young woman is holding him around her arms. She is lying against stone walls that were dark and shabby. I could see her because there is a lamp near the bed. A dying one. 
+She couldn't get her eyes open, frowned, trembling in the corner. But she keeps padding on the baby's back. 
+
+Hunger? Cold? Or Desperate?
+Maybe all.
+
+[["How did I get here?"]]
+
+
+:: You safely get out and on the second day... {"position":"1825,1350","size":"100,100"}
+Only two days later, the words spread out,
+The King is dead.
+
+Most people are cheering. Some of them even opening a party in the bar. 
+"I heard someone killed that motherfucker."
+"Really? Cheers to that brave one. HAHAHAH."
+
+You walked about and heard that. You felt such a relief. 
+For decades, you have never seen them this happy.
+
+A week after, you were called out by the Queen and Gwyneth,
+You are scared but they sent out some guards so that you can not just say no, so you went with them to the palace.
+
+You are invited into the heart of the greate palace hall. The Throne. And the Queen and her daughter Gwyneth are standing in the left and right of that. Hundreds of poeple are lining up on the left and right. They know something big is coming. The Queen speaks with a firm voice,
+
+"There is no gods in this world or any other worlds can forgive what you did."
+
+"But...
+King Authur is a Evil as well."
+
+Shocked. Not only you but also the whole palace.
+
+"On the other hand. Knight, you have the courage, justice, and determination to risk all your life for a course that you knew it is right. No matter how hard it is. 
+
+You are born poor so you know the toughness of the common people. You have both the empathy, a rare quality for men.
+
+I have let people to ask every men and women that know you well these few days. Not suprisingly, they all said you are the most amazing person they have ever seen and they would trust all their lives for you."
+
+Your eyes start to well up with tears.
+
+"Therefore, after careful consideration of both mine and the Princess Gwyneth, I am offering you a chance to redeem your sins."
+
+"Take the Crown,
+Serve the People."
+
+[[This is the biggest opportunity to bring the peace to the realm by your own hand. "I accept it." You said it, in front of everyone.]]
+
+[["I am grateful for that. But no. That is not my place to be."]]
+
+
+:: You safely get out and on the second day...But you felt like this is not the end... {"position":"1750,575","size":"100,100"}
+Only two days later, the words spread out,
+The King is dead.
+
+Most people are cheering. Some of them even opening a party in the bar. 
+"I heard someone killed that motherfucker."
+"Really? Cheers to that brave one. HAHAHAH."
+
+You walked about and heard that. You felt such a relief. 
+For decades, you have never seen them this happy.
+
+But not for long.
+
+"All hail to the king Valerian!"
+The courtiers announced this on the next Sunday after Aurthur died
+You suddenly realized what is the thing you feel unfinished.
+Prince Valerian is sitting on the same carriage that his father used to sit on. 
+You can't see any sadness from a boy that just lost his father.
+You see lust.
+You see greedy for power.
+You see another Authur in his eyes.
+
+And you are right.
+Ten years later, King Valerian turns out to be even a bigger tryant then Authur. He is victious, a royal parasite bleeding his own kingdom dry. He relentlessly drains the lifeblood of the common people, taxing them into starvation and fund his own decadent court.
+
+"Why I did not kill him that night?"
+You asked yourself that on the day you met Marina.
+You asked yourself that on the day you get married.
+You asked yourself that on the day your son was born.
+You asked yourself that on the day you bought your first house.
+You asked yourself that on the day you moved to the east.
+You asked yourself that on the day your legs start to hurt.
+You asked yourself that on the day your sword start to get rusty.
+You asked yourself that on the day you can not get out of the bed.
+
+You asked yourself that on the last moment you died.
+
+"I was just trying to be a good knight..."
+You are right.
+You can slay one king, but you can never slay the greed in people's mind.
+
+Or can you?
+
+[[BAD ENDDING]] 
+
+
+

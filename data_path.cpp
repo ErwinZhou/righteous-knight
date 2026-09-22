@@ -44,7 +44,7 @@ static std::string get_exe_path() {
 	//From: https://stackoverflow.com/questions/799679/programmatically-retrieving-the-absolute-path-of-an-os-x-command-line-app/1024933
 	uint32_t bufsize = 0;
 	std::vector< char > buffer;
-	_NSGetExecutablePath(&buffer[0], &bufsize);
+	_NSGetExecutablePath(nullptr, &bufsize);
 	buffer.resize(bufsize, '\0');
 	bufsize = buffer.size();
 	if (_NSGetExecutablePath(&buffer[0], &bufsize) != 0) {
