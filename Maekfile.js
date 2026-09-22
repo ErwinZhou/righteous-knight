@@ -127,7 +127,8 @@ if (maek.OS === "windows") {
 // to: file to copy to
 let copies = [
 	maek.COPY('README.md', 'dist/README.md'),
-	maek.COPY('screenshot.png', 'dist/screenshot.png'),
+	maek.COPY('screenshots/screenshot.png', 'dist/screenshots/screenshot.png'),
+	maek.COPY('screenshots/twine.png', 'dist/screenshots/twine.png'),
 	maek.COPY('NEST.md', 'dist/NEST.md'),
 	maek.COPY('docs/asset-pipeline.md', 'dist/docs/asset-pipeline.md'),
 	maek.COPY('docs/validation.md', 'dist/docs/validation.md'),
