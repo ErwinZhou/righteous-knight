@@ -1,245 +1,243 @@
 #include "PlayMode.hpp"
-
-#include "LitColorTextureProgram.hpp"
-
-#include "DrawLines.hpp"
-#include "Mesh.hpp"
-#include "Load.hpp"
-#include "gl_errors.hpp"
+#include "GL.hpp"
 #include "data_path.hpp"
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
 
-#include <glm/gtc/type_ptr.hpp>
-
-#include <random>
-
-GLuint hexapod_meshes_for_lit_color_texture_program = 0;
-Load< MeshBuffer > hexapod_meshes(LoadTagDefault, []() -> MeshBuffer const * {
-	MeshBuffer const *ret = new MeshBuffer(data_path("hexapod.pnct"));
-	hexapod_meshes_for_lit_color_texture_program = ret->make_vao_for_program(lit_color_texture_program->program);
-	return ret;
-});
-
-Load< Scene > hexapod_scene(LoadTagDefault, []() -> Scene const * {
-	return new Scene(data_path("hexapod.scene"), [&](Scene &scene, Scene::Transform *transform, std::string const &mesh_name){
-		Mesh const &mesh = hexapod_meshes->lookup(mesh_name);
-
-		scene.drawables.emplace_back(transform);
-		Scene::Drawable &drawable = scene.drawables.back();
-
-		drawable.pipeline = lit_color_texture_program_pipeline;
-
-		drawable.pipeline.vao = hexapod_meshes_for_lit_color_texture_program;
-		drawable.pipeline.type = mesh.type;
-		drawable.pipeline.start = mesh.start;
-		drawable.pipeline.count = mesh.count;
-
-	});
-});
-
-Load< Sound::Sample > dusty_floor_sample(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("dusty-floor.opus"));
-});
-
-
-Load< Sound::Sample > honk_sample(LoadTagDefault, []() -> Sound::Sample const * {
-	return new Sound::Sample(data_path("honk.wav"));
-});
-
-
-PlayMode::PlayMode() : scene(*hexapod_scene) {
-	//get pointers to leg for convenience:
-	for (auto &transform : scene.transforms) {
-		if (transform.name == "Hip.FL") hip = &transform;
-		else if (transform.name == "UpperLeg.FL") upper_leg = &transform;
-		else if (transform.name == "LowerLeg.FL") lower_leg = &transform;
-	}
-	if (hip == nullptr) throw std::runtime_error("Hip not found.");
-	if (upper_leg == nullptr) throw std::runtime_error("Upper leg not found.");
-	if (lower_leg == nullptr) throw std::runtime_error("Lower leg not found.");
-
-	hip_base_rotation = hip->rotation;
-	upper_leg_base_rotation = upper_leg->rotation;
-	lower_leg_base_rotation = lower_leg->rotation;
-
-	//get pointer to camera for convenience:
-	if (scene.cameras.size() != 1) throw std::runtime_error("Expecting scene to have exactly one camera, but it has " + std::to_string(scene.cameras.size()));
-	camera = &scene.cameras.front();
-
-	//start music loop playing:
-	// (note: position will be over-ridden in update())
-	leg_tip_loop = Sound::loop_3D(*dusty_floor_sample, 1.0f, get_leg_tip_position(), 10.0f);
+namespace {
+Story load_story() {
+    auto path = data_path("story.bin");
+    try { return Story::load(path); }
+    catch (std::exception const &e) {
+        throw std::runtime_error("Cannot load story '" + path + "': " + e.what());
+    }
 }
 
-PlayMode::~PlayMode() {
+void scissor(PlayMode::Rect r, glm::uvec2 logical, glm::uvec2 physical) {
+    float sx = float(physical.x) / logical.x, sy = float(physical.y) / logical.y;
+    int left = int(std::ceil(r.x * sx)), right = int(std::floor((r.x + r.width) * sx));
+    int top = int(std::ceil(r.y * sy)), bottom = int(std::floor((r.y + r.height) * sy));
+    glScissor(left, int(physical.y) - bottom, std::max(0, right - left), std::max(0, bottom - top));
+}
+} // namespace
+
+PlayMode::PlayMode() : story(load_story()), font(data_path("fonts/NotoSerif.ttf")) {
+    enter_node(story.start);
+    std::cout << "Ready; Enter or click chooses, R restarts, Escape exits\n";
+}
+
+void PlayMode::enter_node(uint32_t id) {
+    auto const &node = story.nodes.at(id);
+    state = State::Reading;
+    current_node = id;
+    selected_choice = 0;
+    scroll_y = 0;
+    hovered_choice = -1;
+    mouse_position = {-1, -1};
+    choice_rects.clear();
+    block_origins.clear();
+    layout_dirty = true;
+    std::cout << "Story node " << id << ": " << node.name << " (" << node.choices.size() << " choices)\n";
+}
+
+void PlayMode::select_choice(uint32_t option) { enter_node(story.choose(current_node, option)); }
+
+void PlayMode::request_restart() {
+    saved_scroll = scroll_y;
+    saved_choice = selected_choice;
+    state = State::ConfirmRestart;
+    selected_choice = 0;
+    scroll_y = 0;
+    hovered_choice = -1;
+    choice_rects.clear();
+    layout_dirty = true;
+}
+
+void PlayMode::cancel_restart() {
+    state = State::Reading;
+    scroll_y = saved_scroll;
+    selected_choice = saved_choice;
+    hovered_choice = -1;
+    choice_rects.clear();
+    layout_dirty = true;
+}
+
+void PlayMode::confirm_selection() {
+    // one confirmation changes one screen and invalidates its old hit regions
+    if (layout_dirty) return;
+    if (state == State::ConfirmRestart) {
+        if (selected_choice == 0) enter_node(story.start);
+        else cancel_restart();
+    } else if (selected_choice < story.nodes.at(current_node).choices.size()) {
+        select_choice(selected_choice);
+    }
+}
+
+int PlayMode::hit_choice(glm::vec2 mouse) const {
+    if (layout_dirty || !reading_viewport.contains(mouse)) return -1;
+    glm::vec2 content = mouse - glm::vec2(reading_viewport.x, reading_viewport.y) + glm::vec2(0, scroll_y);
+    for (size_t i = 0; i < choice_rects.size(); ++i)
+        if (choice_rects[i].contains(content)) return int(i);
+    return -1;
+}
+
+void PlayMode::scroll_to(float position) {
+    scroll_y = std::clamp(position, 0.0f, max_scroll);
+    hovered_choice = hit_choice(mouse_position);
+}
+
+void PlayMode::reveal_choice() {
+    if (selected_choice >= choice_rects.size()) return;
+    auto const &r = choice_rects[selected_choice];
+    if (r.height > reading_viewport.height || r.y < scroll_y) scroll_to(r.y);
+    else if (r.y + r.height > scroll_y + reading_viewport.height)
+        scroll_to(r.y + r.height - reading_viewport.height);
 }
 
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
-
-	if (evt.type == SDL_EVENT_KEY_DOWN) {
-		if (evt.key.key == SDLK_ESCAPE) {
-			SDL_SetWindowRelativeMouseMode(Mode::window, false);
-			return true;
-		} else if (evt.key.key == SDLK_A) {
-			left.downs += 1;
-			left.pressed = true;
-			return true;
-		} else if (evt.key.key == SDLK_D) {
-			right.downs += 1;
-			right.pressed = true;
-			return true;
-		} else if (evt.key.key == SDLK_W) {
-			up.downs += 1;
-			up.pressed = true;
-			return true;
-		} else if (evt.key.key == SDLK_S) {
-			down.downs += 1;
-			down.pressed = true;
-			return true;
-		} else if (evt.key.key == SDLK_SPACE) {
-			if (honk_oneshot) honk_oneshot->stop();
-			honk_oneshot = Sound::play_3D(*honk_sample, 0.3f, glm::vec3(4.6f, -7.8f, 6.9f)); //hardcoded position of front of car, from blender
-		}
-	} else if (evt.type == SDL_EVENT_KEY_UP) {
-		if (evt.key.key == SDLK_A) {
-			left.pressed = false;
-			return true;
-		} else if (evt.key.key == SDLK_D) {
-			right.pressed = false;
-			return true;
-		} else if (evt.key.key == SDLK_W) {
-			up.pressed = false;
-			return true;
-		} else if (evt.key.key == SDLK_S) {
-			down.pressed = false;
-			return true;
-		}
-	} else if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-		if (SDL_GetWindowRelativeMouseMode(Mode::window) == false) {
-			SDL_SetWindowRelativeMouseMode(Mode::window, true);
-			return true;
-		}
-	} else if (evt.type == SDL_EVENT_MOUSE_MOTION) {
-		if (SDL_GetWindowRelativeMouseMode(Mode::window) == true) {
-			glm::vec2 motion = glm::vec2(
-				evt.motion.xrel / float(window_size.y),
-				-evt.motion.yrel / float(window_size.y)
-			);
-			camera->transform->rotation = glm::normalize(
-				camera->transform->rotation
-				* glm::angleAxis(-motion.x * camera->fovy, glm::vec3(0.0f, 1.0f, 0.0f))
-				* glm::angleAxis(motion.y * camera->fovy, glm::vec3(1.0f, 0.0f, 0.0f))
-			);
-			return true;
-		}
-	}
-
-	return false;
+    if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.repeat) return true;
+    if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.key == SDLK_ESCAPE) {
+        if (state == State::ConfirmRestart) cancel_restart();
+        else Mode::set_current(nullptr);
+        return true;
+    }
+    if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.key == SDLK_R) {
+        if (state == State::Reading && !layout_dirty) request_restart();
+        return true;
+    }
+    if (window_size != layout_window || evt.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) layout_dirty = true;
+    if (evt.type == SDL_EVENT_MOUSE_MOTION) mouse_position = {evt.motion.x, evt.motion.y};
+    if (evt.type == SDL_EVENT_WINDOW_MOUSE_LEAVE) mouse_position = {-1, -1};
+    if (layout_dirty) return false;
+    if (evt.type == SDL_EVENT_MOUSE_MOTION || evt.type == SDL_EVENT_WINDOW_MOUSE_LEAVE) {
+        hovered_choice = hit_choice(mouse_position);
+        return true;
+    }
+    if (evt.type == SDL_EVENT_MOUSE_BUTTON_DOWN && evt.button.button == SDL_BUTTON_LEFT) {
+        mouse_position = {evt.button.x, evt.button.y};
+        hovered_choice = hit_choice(mouse_position);
+        if (evt.button.clicks > 1) return true;
+        if (hovered_choice >= 0) {
+            selected_choice = uint32_t(hovered_choice);
+            confirm_selection();
+        }
+        return true;
+    }
+    if (evt.type == SDL_EVENT_MOUSE_WHEEL) {
+        float direction = evt.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -1.0f : 1.0f;
+        scroll_to(scroll_y - evt.wheel.y * direction * 48.0f);
+        return true;
+    }
+    if (evt.type == SDL_EVENT_KEY_DOWN) {
+        switch (evt.key.key) {
+        case SDLK_RETURN:
+        case SDLK_KP_ENTER: confirm_selection(); return true;
+        case SDLK_HOME: scroll_to(0); return true;
+        case SDLK_END: scroll_to(max_scroll); return true;
+        case SDLK_PAGEUP: scroll_to(scroll_y - reading_viewport.height * 0.85f); return true;
+        case SDLK_PAGEDOWN: scroll_to(scroll_y + reading_viewport.height * 0.85f); return true;
+        case SDLK_UP:
+        case SDLK_DOWN:
+            if (!choice_rects.empty()) {
+                if (evt.key.key == SDLK_UP && selected_choice > 0) --selected_choice;
+                if (evt.key.key == SDLK_DOWN && selected_choice + 1 < choice_rects.size()) ++selected_choice;
+                reveal_choice();
+            }
+            return true;
+        default: break;
+        }
+    }
+    return false;
 }
 
-void PlayMode::update(float elapsed) {
+void PlayMode::update(float) {}
 
-	//slowly rotates through [0,1):
-	wobble += elapsed / 10.0f;
-	wobble -= std::floor(wobble);
-
-	hip->rotation = hip_base_rotation * glm::angleAxis(
-		glm::radians(5.0f * std::sin(wobble * 2.0f * float(M_PI))),
-		glm::vec3(0.0f, 1.0f, 0.0f)
-	);
-	upper_leg->rotation = upper_leg_base_rotation * glm::angleAxis(
-		glm::radians(7.0f * std::sin(wobble * 2.0f * 2.0f * float(M_PI))),
-		glm::vec3(0.0f, 0.0f, 1.0f)
-	);
-	lower_leg->rotation = lower_leg_base_rotation * glm::angleAxis(
-		glm::radians(10.0f * std::sin(wobble * 3.0f * 2.0f * float(M_PI))),
-		glm::vec3(0.0f, 0.0f, 1.0f)
-	);
-
-	//move sound to follow leg tip position:
-	leg_tip_loop->set_position(get_leg_tip_position(), 1.0f / 60.0f);
-
-	//move camera:
-	{
-
-		//combine inputs into a move:
-		constexpr float PlayerSpeed = 30.0f;
-		glm::vec2 move = glm::vec2(0.0f);
-		if (left.pressed && !right.pressed) move.x =-1.0f;
-		if (!left.pressed && right.pressed) move.x = 1.0f;
-		if (down.pressed && !up.pressed) move.y =-1.0f;
-		if (!down.pressed && up.pressed) move.y = 1.0f;
-
-		//make it so that moving diagonally doesn't go faster:
-		if (move != glm::vec2(0.0f)) move = glm::normalize(move) * PlayerSpeed * elapsed;
-
-		glm::mat4x3 frame = camera->transform->make_parent_from_local();
-		glm::vec3 frame_right = frame[0];
-		//glm::vec3 up = frame[1];
-		glm::vec3 frame_forward = -frame[2];
-
-		camera->transform->position += move.x * frame_right + move.y * frame_forward;
-	}
-
-	{ //update listener to camera position:
-		glm::mat4x3 frame = camera->transform->make_parent_from_local();
-		glm::vec3 frame_right = frame[0];
-		glm::vec3 frame_at = frame[3];
-		Sound::listener.set_position_right(frame_at, frame_right, 1.0f / 60.0f);
-	}
-
-	//reset button press counters:
-	left.downs = 0;
-	right.downs = 0;
-	up.downs = 0;
-	down.downs = 0;
+void PlayMode::rebuild_layout(glm::uvec2 logical_size) {
+    float width = std::max(1.0f, std::min(800.0f, float(logical_size.x) - 48.0f));
+    auto const &node = story.nodes.at(current_node);
+    std::string controls = state == State::ConfirmRestart
+        ? "Enter/click: confirm   Up/Down: select   Esc: cancel"
+        : node.choices.empty()
+            ? "End of story   R: restart   Esc: exit   Wheel/Page: scroll"
+            : "Enter/click: choose   Up/Down: focus   Wheel/Page: scroll   Home/End: top/bottom   R: restart   Esc: exit";
+    footer_renderer->set_text(controls, width);
+    footer_y = std::max(0.0f, float(logical_size.y) - footer_renderer->text_block().height - 16.0f);
+    reading_viewport = {24, 24, width, std::max(1.0f, footer_y - 40.0f)};
+    std::vector<std::string> text;
+    if (state == State::ConfirmRestart) {
+        text = {"Restart story?", "Your current progress will be lost.", "Restart", "Keep reading"};
+    } else {
+        text = {"A Righteous Knight", node.text};
+        for (size_t i = 0; i < node.choices.size(); ++i)
+            text.push_back(std::to_string(i + 1) + ". " + node.choices[i].label);
+    }
+    text_renderer->set_blocks(text, std::max(1.0f, width - 24));
+    block_origins.clear();
+    choice_rects.clear();
+    float y = 0;
+    // keep layout and hit regions in the same unscrolled content coordinates
+    for (size_t i = 0; i < text.size(); ++i) {
+        float height = text_renderer->text_block(i).height;
+        if (i >= 2) {
+            choice_rects.push_back({0, y, width, height + 24});
+            block_origins.push_back({12, y + 12});
+            y += height + 36;
+        } else {
+            block_origins.push_back({12, y});
+            y += height + 24;
+        }
+    }
+    content_height = y;
+    max_scroll = std::max(0.0f, content_height - reading_viewport.height);
+    layout_window = logical_size;
+    layout_dirty = false;
+    scroll_to(scroll_y);
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
-	//update camera aspect ratio for drawable:
-	camera->aspect = float(drawable_size.x) / float(drawable_size.y);
-
-	//set up light type and position for lit_color_texture_program:
-	// TODO: consider using the Light(s) in the scene to do this
-	glUseProgram(lit_color_texture_program->program);
-	glUniform1i(lit_color_texture_program->LIGHT_TYPE_int, 1);
-	glUniform3fv(lit_color_texture_program->LIGHT_DIRECTION_vec3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f,-1.0f)));
-	glUniform3fv(lit_color_texture_program->LIGHT_ENERGY_vec3, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 0.95f)));
-	glUseProgram(0);
-
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	glClearDepth(1.0f); //1.0 is actually the default value to clear the depth buffer to, but FYI you can change it.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
-
-	scene.draw(*camera);
-
-	{ //use DrawLines to overlay some text:
-		glDisable(GL_DEPTH_TEST);
-		float aspect = float(drawable_size.x) / float(drawable_size.y);
-		DrawLines lines(glm::mat4(
-			1.0f / aspect, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f
-		));
-
-		constexpr float H = 0.09f;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
-		float ofs = 2.0f / drawable_size.y;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
-	}
-	GL_ERRORS();
-}
-
-glm::vec3 PlayMode::get_leg_tip_position() {
-	//the vertex position here was read from the model in blender:
-	return lower_leg->make_world_from_local() * glm::vec4(-1.26137f, -11.861f, 0.0f, 1.0f);
+    if (!drawable_size.x || !drawable_size.y) return;
+    int w, h;
+    SDL_GetWindowSize(Mode::window, &w, &h);
+    if (w <= 0 || h <= 0) return;
+    glm::uvec2 logical_size(w, h);
+    float density = float(drawable_size.y) / h;
+    unsigned pixels = std::max(1u, unsigned(std::lround(24.0f * density)));
+    if (!text_renderer || pixels != font_pixels || density != font_density) {
+        text_renderer.reset();
+        footer_renderer.reset();
+        text_renderer = std::make_unique<TextRenderer>(font, pixels, density);
+        footer_renderer = std::make_unique<TextRenderer>(font, std::max(1u, unsigned(std::lround(14 * density))), density);
+        font_pixels = pixels;
+        font_density = density;
+        layout_dirty = true;
+    }
+    if (layout_window != logical_size) layout_dirty = true;
+    if (layout_dirty) rebuild_layout(logical_size);
+    glDisable(GL_SCISSOR_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glClearColor(0.035f, 0.03f, 0.025f, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_SCISSOR_TEST);
+    // convert the clipped logical rectangle to OpenGL's bottom-left physical coordinates
+    for (size_t i = 0; i < block_origins.size(); ++i) {
+        if (i >= 2 && (i - 2 == selected_choice || int(i - 2) == hovered_choice)) {
+            Rect r = choice_rects[i - 2];
+            float top = std::max(0.0f, r.y - scroll_y);
+            float bottom = std::min(reading_viewport.height, r.y + r.height - scroll_y);
+            if (bottom > top) {
+                scissor({reading_viewport.x, reading_viewport.y + top, r.width, bottom - top}, logical_size, drawable_size);
+                glClearColor(0.12f, 0.09f, 0.055f, 1);
+                glClear(GL_COLOR_BUFFER_BIT);
+            }
+        }
+        scissor(reading_viewport, logical_size, drawable_size);
+        glm::vec2 origin = glm::vec2(reading_viewport.x, reading_viewport.y - scroll_y) + block_origins[i];
+        float height = text_renderer->text_block(i).height;
+        if (origin.y + height < reading_viewport.y || origin.y > reading_viewport.y + reading_viewport.height) continue;
+        text_renderer->draw(logical_size, origin, {0.95f, 0.88f, 0.72f, 1}, i);
+    }
+    glDisable(GL_SCISSOR_TEST);
+    footer_renderer->draw(logical_size, {24, footer_y}, {0.65f, 0.61f, 0.53f, 1});
 }

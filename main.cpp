@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 
 	//create window:
 	Mode::window = SDL_CreateWindow(
-		"gp26 game4: choice-based game", //TODO: remember to set a title for your game!
+		"A Righteous Knight",
 		1280, 720, //TODO: modify window size if you'd like
 		SDL_WINDOW_OPENGL
 		| SDL_WINDOW_RESIZABLE //uncomment to allow resizing
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 	);
 
 	//prevent exceedingly tiny windows when resizing:
-	SDL_SetWindowMinimumSize(Mode::window,100,100);
+	SDL_SetWindowMinimumSize(Mode::window,320,240);
 
 	if (!Mode::window) {
 		std::cerr << "Error creating SDL window: " << SDL_GetError() << std::endl;
@@ -115,7 +115,17 @@ int main(int argc, char **argv) {
 	call_load_functions();
 
 	//------------ create game mode + make current --------------
-	Mode::set_current(std::make_shared< PlayMode >());
+	try {
+		Mode::set_current(std::make_shared< PlayMode >());
+	} catch (std::exception const &e) {
+		std::cerr << "Game initialization failed: " << e.what() << std::endl;
+		Sound::shutdown();
+		SDL_GL_DestroyContext(context);
+		SDL_DestroyWindow(Mode::window);
+		Mode::window = nullptr;
+		SDL_Quit();
+		return 1;
+	}
 
 	//------------ main loop ------------
 
@@ -135,6 +145,8 @@ int main(int argc, char **argv) {
 	on_resize();
 
 	//This will loop until the current mode is set to null:
+	int exit_code = 0;
+	try {
 	while (Mode::current) {
 		//every pass through the game loop creates one frame of output
 		//  by performing three steps:
@@ -198,6 +210,11 @@ int main(int argc, char **argv) {
 		SDL_GL_SwapWindow(Mode::window);
 	}
 
+    } catch (std::exception const &e) {
+        std::cerr << "Game failed: " << e.what() << std::endl;
+        Mode::set_current(nullptr);
+        exit_code = 1;
+    }
 
 	//------------  teardown ------------
 	Sound::shutdown();
@@ -208,7 +225,7 @@ int main(int argc, char **argv) {
 	SDL_DestroyWindow(Mode::window);
 	Mode::window = NULL;
 
-	return 0;
+	return exit_code;
 
 #ifdef _WIN32
 	} catch (std::exception const &e) {

@@ -126,6 +126,12 @@ if (maek.OS === "windows") {
 // from: file to copy from
 // to: file to copy to
 let copies = [
+	maek.COPY('README.md', 'dist/README.md'),
+	maek.COPY('screenshots/screenshot.png', 'dist/screenshots/screenshot.png'),
+	maek.COPY('screenshots/twine.png', 'dist/screenshots/twine.png'),
+	maek.COPY('NEST.md', 'dist/NEST.md'),
+	maek.COPY('docs/asset-pipeline.md', 'dist/docs/asset-pipeline.md'),
+	maek.COPY('docs/validation.md', 'dist/docs/validation.md'),
 	maek.COPY(`${NEST_LIBS}/SDL3/dist/README-SDL.txt`, `dist/README-SDL.txt`),
 	maek.COPY(`${NEST_LIBS}/libpng/dist/README-libpng.txt`, `dist/README-libpng.txt`),
 	maek.COPY(`${NEST_LIBS}/glm/dist/README-glm.txt`, `dist/README-glm.txt`),
@@ -137,8 +143,6 @@ let copies = [
 ];
 if (maek.OS === 'windows') {
 	copies.push( maek.COPY(`${NEST_LIBS}/SDL3/dist/SDL3.dll`, `dist/SDL3.dll`) );
-	//this one needed because the show-*.exe helpers sit in scenes/:
-	copies.push( maek.COPY(`${NEST_LIBS}/SDL3/dist/SDL3.dll`, `scenes/SDL3.dll`) );
 }
 
 //call rules on the maek object to specify tasks.
@@ -151,9 +155,12 @@ if (maek.OS === 'windows') {
 //returns objFile: objFileBase + a platform-dependant suffix ('.o' or '.obj')
 const game_names = [
 	maek.CPP('Story.cpp'),
+	maek.CPP('FontAsset.cpp'),
+	maek.CPP('TextProgram.cpp'),
+	maek.CPP('TextRenderer.cpp'),
+	maek.CPP('TextLayout.cpp'),
 	maek.CPP('PlayMode.cpp'),
 	maek.CPP('main.cpp'),
-	maek.CPP('LitColorTextureProgram.cpp'),
 	//maek.CPP('ColorTextureProgram.cpp'),  //not used right now, but you might want it
 	maek.CPP('Sound.cpp'),
 	maek.CPP('load_wav.cpp'),
@@ -166,25 +173,11 @@ const common_names = [
 	maek.CPP('PathFont-font.cpp'),
 	maek.CPP('DrawLines.cpp'),
 	maek.CPP('ColorProgram.cpp'),
-	maek.CPP('Scene.cpp'),
-	maek.CPP('Mesh.cpp'),
 	maek.CPP('load_save_png.cpp'),
 	maek.CPP('gl_compile_program.cpp'),
 	maek.CPP('Mode.cpp'),
 	maek.CPP('GL.cpp'),
 	maek.CPP('Load.cpp')
-];
-
-const show_meshes_names = [
-	maek.CPP('show-meshes.cpp'),
-	maek.CPP('ShowMeshesProgram.cpp'),
-	maek.CPP('ShowMeshesMode.cpp')
-];
-
-const show_scene_names = [
-	maek.CPP('show-scene.cpp'),
-	maek.CPP('ShowSceneProgram.cpp'),
-	maek.CPP('ShowSceneMode.cpp')
 ];
 
 const freetype_test_names = [
@@ -196,13 +189,11 @@ const freetype_test_names = [
 // exeFileBase: name of executable file to produce
 //returns exeFile: exeFileBase + a platform-dependant suffix (e.g., '.exe' on windows)
 const game_exe = maek.LINK([...game_names, ...common_names], 'dist/game');
-const show_meshes_exe = maek.LINK([...show_meshes_names, ...common_names], 'scenes/show-meshes');
-const show_scene_exe = maek.LINK([...show_scene_names, ...common_names], 'scenes/show-scene');
 
 const freetype_test_exe = maek.LINK([...freetype_test_names], 'freetype-test');
 
-// Narrative compilation is independent of the native library dependencies.
-// Override PYTHON on systems where Python 3 is named differently.
+// compile story without native libraries
+// set PYTHON to override the interpreter
 const story_asset = 'dist/story.bin';
 const compile_story = async () => {
 	await new Promise((resolve, reject) => {
@@ -217,15 +208,53 @@ const compile_story = async () => {
 compile_story.depends = ['tools/compile_story.py', 'assets/story/righteous-knight.twee'];
 compile_story.label = 'STORY ' + story_asset;
 maek.tasks[story_asset] = compile_story;
+const font_assets = ['NotoSerif.ttf', 'OFL.txt', 'README.md'].map(name =>
+	maek.COPY('assets/fonts/' + name, 'dist/fonts/' + name));
 const assets_target = async () => {};
-assets_target.depends = [story_asset];
+assets_target.depends = [story_asset, ...font_assets];
 assets_target.label = 'ASSETS';
 maek.tasks[':assets'] = assets_target;
-// Building the game also validates/rebuilds its narrative data.
-maek.tasks[game_exe].depends.push(story_asset);
+// rebuild assets with the game
+maek.tasks[game_exe].depends.push(story_asset, ...font_assets);
+
+// optional render check with a real OpenGL context
+maek.LINK([
+    maek.CPP('tests/stage2_check.cpp'),
+    ...['FontAsset', 'TextRenderer', 'TextLayout', 'TextProgram', 'gl_compile_program', 'GL', 'load_save_png']
+        .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
+], 'objs/stage2-check');
+
+// optional story state check without drawing
+maek.LINK([
+    maek.CPP('tests/stage1_check.cpp'),
+    ...['PlayMode', 'Story', 'FontAsset', 'TextRenderer', 'TextLayout', 'TextProgram',
+        'gl_compile_program', 'GL', 'Mode', 'data_path']
+        .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
+], 'objs/stage1-check');
+
+maek.LINK([
+    maek.CPP('tests/stage3_check.cpp'),
+    ...['FontAsset', 'TextRenderer', 'TextLayout', 'TextProgram', 'Story',
+        'gl_compile_program', 'GL', 'load_save_png']
+        .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
+], 'objs/stage3-check');
+
+maek.LINK([
+    maek.CPP('tests/stage4_check.cpp'),
+    ...['PlayMode', 'FontAsset', 'TextRenderer', 'TextLayout', 'TextProgram', 'Story',
+        'gl_compile_program', 'GL', 'Mode', 'data_path', 'load_save_png']
+        .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
+], 'objs/stage4-check');
+
+maek.LINK([
+    maek.CPP('tests/stage5_check.cpp'),
+    ...['PlayMode', 'FontAsset', 'TextRenderer', 'TextLayout', 'TextProgram', 'Story',
+        'gl_compile_program', 'GL', 'Mode', 'data_path', 'load_save_png']
+        .map(name => maek.options.objPrefix + name + maek.options.objSuffix)
+], 'objs/stage5-check');
 
 //set the default target to the game (and copy the readme files):
-maek.TARGETS = [game_exe, show_meshes_exe, show_scene_exe, freetype_test_exe, ...copies];
+maek.TARGETS = [game_exe, freetype_test_exe, ...copies];
 
 //Note that tasks that produce ':abstract targets' are never cached.
 // This is similar to how .PHONY targets behave in make.
