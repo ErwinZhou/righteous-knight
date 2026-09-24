@@ -130,8 +130,6 @@ let copies = [
 	maek.COPY('screenshots/screenshot.png', 'dist/screenshots/screenshot.png'),
 	maek.COPY('screenshots/twine.png', 'dist/screenshots/twine.png'),
 	maek.COPY('NEST.md', 'dist/NEST.md'),
-	maek.COPY('docs/asset-pipeline.md', 'dist/docs/asset-pipeline.md'),
-	maek.COPY('docs/validation.md', 'dist/docs/validation.md'),
 	maek.COPY(`${NEST_LIBS}/SDL3/dist/README-SDL.txt`, `dist/README-SDL.txt`),
 	maek.COPY(`${NEST_LIBS}/libpng/dist/README-libpng.txt`, `dist/README-libpng.txt`),
 	maek.COPY(`${NEST_LIBS}/glm/dist/README-glm.txt`, `dist/README-glm.txt`),
